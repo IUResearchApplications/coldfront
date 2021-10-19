@@ -1,8 +1,17 @@
+from os import path
+
 from django.contrib.messages import constants as messages
+from coldfront.core.utils.common import import_from_settings
 
 #------------------------------------------------------------------------------
 # ColdFront logging config
 #------------------------------------------------------------------------------
+
+LOG_LEVEL = import_from_settings(
+    'LOG_LEVEL', 'INFO')
+
+LOG_BASE_DIR = import_from_settings(
+    'LOG_BASE_DIR', './logs')
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'info',
@@ -34,69 +43,69 @@ LOGGING = {
         },
         'allocation': {
             'class': 'coldfront.config.modified_handlers.TimedRotatingFileHandler',
-            'filename': './logs/core/allocation/allocation.log',
+            'filename': path.join(LOG_BASE_DIR, 'core/allocation/allocation.log'),
             'formatter': 'custom',
             'when': 'midnight',
         },
         'user': {
             'class': 'coldfront.config.modified_handlers.TimedRotatingFileHandler',
-            'filename': './logs/core/user/user.log',
+            'filename': path.join(LOG_BASE_DIR, 'core/user/user.log'),
             'formatter': 'custom',
             'when': 'midnight',
         },
         'project': {
             'class': 'coldfront.config.modified_handlers.TimedRotatingFileHandler',
-            'filename': './logs/core/project/project.log',
+            'filename': path.join(LOG_BASE_DIR, 'core/project/project.log'),
             'formatter': 'custom',
             'when': 'midnight',
         },
         'utils': {
             'class': 'coldfront.config.modified_handlers.TimedRotatingFileHandler',
-            'filename': './logs/core/utils/utils.log',
+            'filename': path.join(LOG_BASE_DIR, 'core/utils/utils.log'),
             'formatter': 'custom',
             'when': 'midnight',
         },
         'coldfront': {
             'class': 'coldfront.config.modified_handlers.TimedRotatingFileHandler',
-            'filename': './logs/coldfront/coldfront.log',
+            'filename': path.join(LOG_BASE_DIR, 'coldfront/coldfront.log'),
             'formatter': 'custom',
             'when': 'midnight',
         },
         'ldap_user_search': {
             'class': 'coldfront.config.modified_handlers.TimedRotatingFileHandler',
-            'filename': './logs/plugins/ldap_user_search/ldap_user_search.log',
+            'filename': path.join(LOG_BASE_DIR, 'plugins/ldap_user_search/ldap_user_search.log'),
             'formatter': 'custom',
             'when': 'midnight',
         },
     },
     'root': {
         'handlers': ['coldfront', 'console'],
-        'level': 'INFO',
+        'level': LOG_LEVEL,
     },
     'loggers': {
         'coldfront.core.allocation': {
             'handlers': ['allocation'],
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': True,
         },
         'coldfront.core.user': {
             'handlers': ['user'],
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': True,
         },
         'coldfront.core.project': {
             'handlers': ['project'],
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': True,
         },
         'coldfront.core.utils': {
             'handlers': ['utils'],
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': True,
         },
         'coldfront.plugins.ldap_user_search': {
             'handlers': ['ldap_user_search'],
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'propagate': True,
         },
     },
