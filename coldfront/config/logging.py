@@ -83,6 +83,10 @@ LOGGING = {
         'level': LOG_LEVEL,
     },
     'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+        },
         'coldfront.core.allocation': {
             'handlers': ['allocation'],
             'level': LOG_LEVEL,
