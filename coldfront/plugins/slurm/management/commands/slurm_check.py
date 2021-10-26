@@ -90,7 +90,7 @@ class Command(BaseCommand):
                 logger.error(
                     "Failed removing Slurm association user %s account %s cluster %s: %s", user, account, cluster, e)
             else:
-                logger.error(
+                logger.info(
                     "Removed Slurm association user %s account %s cluster %s successfully", user, account, cluster)
 
         row = [
@@ -113,7 +113,7 @@ class Command(BaseCommand):
                 logger.error(
                     "Failed removing Slurm account %s cluster %s: %s", account, cluster, e)
             else:
-                logger.error(
+                logger.info(
                     "Removed Slurm account %s cluster %s successfully", account, cluster)
 
         row = [
@@ -137,7 +137,7 @@ class Command(BaseCommand):
                 logger.error(
                     "Failed removing Slurm qos %s for user %s account %s cluster %s: %s", qos, user, account, cluster, e)
             else:
-                logger.error(
+                logger.info(
                     "Removed Slurm qos %s for user %s account %s cluster %s successfully", qos, user, account, cluster)
 
         row = [
