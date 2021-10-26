@@ -1,17 +1,17 @@
 from os import path
 
+from coldfront.config.env import ENV
 from django.contrib.messages import constants as messages
-from coldfront.core.utils.common import import_from_settings
 
 #------------------------------------------------------------------------------
 # ColdFront logging config
 #------------------------------------------------------------------------------
 
-LOG_LEVEL = import_from_settings(
-    'LOG_LEVEL', 'INFO')
-
-LOG_BASE_DIR = import_from_settings(
-    'LOG_BASE_DIR', './logs')
+LOG_LEVEL = ENV.str('LOG_LEVEL', default='WARNING')
+LOG_BASE_DIR = ENV.str('LOG_BASE_DIR', default='./logs')
+SERVER_EMAIL = ENV.str('SERVER_EMAIL')
+ADMINS = ENV('ADMINS')
+ADMINS = [tuple(x.split(':')) for x in ENV.list('ADMINS')]
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'info',
@@ -77,9 +77,15 @@ LOGGING = {
             'formatter': 'custom',
             'when': 'midnight',
         },
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'custom',
+            'level': 'ERROR',
+            'include_html': False,
+        },
     },
     'root': {
-        'handlers': ['coldfront', 'console'],
+        'handlers': ['coldfront', 'console', 'mail_admins'],
         'level': LOG_LEVEL,
     },
     'loggers': {
