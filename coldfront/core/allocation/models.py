@@ -114,7 +114,7 @@ class Allocation(TimeStampedModel):
         ordering = ['end_date', ]
 
         permissions = (
-            ('can_view_all_allocations', 'Can view all allocations'),
+            ('can_view_all_allocations', 'Can view all resources'),
             ('can_review_allocation_requests',
              'Can review allocation requests'),
             ('can_manage_invoice', 'Can manage invoice'),
@@ -173,7 +173,7 @@ class Allocation(TimeStampedModel):
                                     float(attribute.value) * 10000) / 100
                 except ValueError:
                     percent = 'Invalid Value'
-                    logger.error("Allocation attribute '%s' is not an int but has a usage",
+                    logger.error("Resource attribute '%s' is not an int but has a usage",
                                  attribute.allocation_attribute_type.name)
 
                 string = '{}: {}/{} ({} %) <br>'.format(
@@ -304,7 +304,7 @@ class AllocationAttribute(TimeStampedModel):
 
     def clean(self):
         if self.allocation_attribute_type.is_unique and self.allocation.allocationattribute_set.filter(allocation_attribute_type=self.allocation_attribute_type).exists():
-            raise ValidationError("'{}' attribute already exists for this allocation.".format(
+            raise ValidationError("'{}' attribute already exists for this resource.".format(
                 self.allocation_attribute_type))
 
         expected_value_type = self.allocation_attribute_type.attribute_type.name.strip()
@@ -355,14 +355,14 @@ class AllocationUser(TimeStampedModel):
     allocation = models.ForeignKey(Allocation, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.ForeignKey(AllocationUserStatusChoice, on_delete=models.CASCADE,
-                               verbose_name='Allocation User Status')
+                               verbose_name='Resource User Status')
     history = HistoricalRecords()
 
     def __str__(self):
         return '%s (%s)' % (self.user, self.allocation.resources.first().name)
 
     class Meta:
-        verbose_name_plural = 'Allocation User Status'
+        verbose_name_plural = 'Resource User Status'
         unique_together = ('user', 'allocation')
 
 

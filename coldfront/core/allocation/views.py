@@ -138,7 +138,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
                 guage_data.append(generate_guauge_data_from_usage(attribute.allocation_attribute_type.name,
                                                                   float(attribute.value), float(attribute.allocationattributeusage.value)))
             except ValueError:
-                logger.error("Allocation attribute '%s' is not an int but has a usage",
+                logger.error("Resource attribute '%s' is not an int but has a usage",
                              attribute.allocation_attribute_type.name)
                 invalid_attributes.append(attribute)
 
@@ -492,7 +492,7 @@ class AllocationCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             return True
 
         messages.error(
-            self.request, 'You do not have permission to create a new allocation.')
+            self.request, 'You do not have permission to create a new resource.')
 
     def dispatch(self, request, *args, **kwargs):
         project_obj = get_object_or_404(
@@ -500,12 +500,12 @@ class AllocationCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
         if project_obj.needs_review:
             messages.error(
-                request, 'You cannot request a new allocation because you have to review your project first.')
+                request, 'You cannot request a new resource because you have to review your project first.')
             return HttpResponseRedirect(reverse('project-detail', kwargs={'pk': project_obj.pk}))
 
         if project_obj.status.name not in ['Active', 'New', ]:
             messages.error(
-                request, 'You cannot request a new allocation to an archived project.')
+                request, 'You cannot request a new resource to an archived project.')
             return HttpResponseRedirect(reverse('project-detail', kwargs={'pk': project_obj.pk}))
 
         return super().dispatch(request, *args, **kwargs)
@@ -1105,7 +1105,7 @@ class AllocationCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         if ALLOCATION_ACCOUNT_ENABLED and resource_obj.name in ALLOCATION_ACCOUNT_MAPPING and AllocationAttributeType.objects.filter(
                 name=ALLOCATION_ACCOUNT_MAPPING[resource_obj.name]).exists() and not allocation_account:
             form.add_error(None, format_html(
-                'You need to create an account name. Create it by clicking the link under the "Allocation account" field.'))
+                'You need to create an account name. Create it by clicking the link under the "Resource account" field.'))
             return self.form_invalid(form)
 
         # Check if the required values exist based on what resource was selected.
@@ -1400,7 +1400,7 @@ class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateVi
             return True
 
         messages.error(
-            self.request, 'You do not have permission to add users to the allocation.')
+            self.request, 'You do not have permission to add users to the resource.')
 
     def dispatch(self, request, *args, **kwargs):
         allocation_obj = get_object_or_404(
@@ -1408,11 +1408,11 @@ class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateVi
 
         if allocation_obj.is_locked and not self.request.user.is_superuser:
             messages.error(
-                request, 'You cannot modify this allocation because it is locked! Contact support for details.')
+                request, 'You cannot modify this resource because it is locked! Contact support for details.')
             return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': allocation_obj.pk}))
 
         if allocation_obj.status.name not in ['Active', 'New', 'Renewal Requested', 'Payment Pending', 'Payment Requested', 'Paid']:
-            messages.error(request, 'You cannot add users to a allocation with status {}.'.format(
+            messages.error(request, 'You cannot add users to a resource with status {}.'.format(
                 allocation_obj.status.name))
             return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': allocation_obj.pk}))
         else:
@@ -1529,12 +1529,12 @@ class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateVi
             if added_users:
                 messages.success(
                     request,
-                    'Added user(s) {} to allocation.'.format(', '.join(added_users))
+                    'Added user(s) {} to resource.'.format(', '.join(added_users))
                 )
             if denied_users:
                 messages.warning(
                     request,
-                    'Did not add user(s) {} to allocation. An account is needed for this resource: https://access.iu.edu/Accounts/Create.'.format(', '.join(denied_users))
+                    'Did not add user(s) {} to resource. An account is needed for this resource: https://access.iu.edu/Accounts/Create.'.format(', '.join(denied_users))
                 )
         else:
             for error in formset.errors:
@@ -1561,7 +1561,7 @@ class AllocationRemoveUsersView(LoginRequiredMixin, UserPassesTestMixin, Templat
             return True
 
         messages.error(
-            self.request, 'You do not have permission to remove users from allocation.')
+            self.request, 'You do not have permission to remove users from resource.')
 
     def dispatch(self, request, *args, **kwargs):
         allocation_obj = get_object_or_404(
@@ -1569,11 +1569,11 @@ class AllocationRemoveUsersView(LoginRequiredMixin, UserPassesTestMixin, Templat
 
         if allocation_obj.is_locked and not self.request.user.is_superuser:
             messages.error(
-                request, 'You cannot modify this allocation because it is locked! Contact support for details.')
+                request, 'You cannot modify this resource because it is locked! Contact support for details.')
             return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': allocation_obj.pk}))
 
         if allocation_obj.status.name not in ['Active', 'New', 'Renewal Requested', 'Paid', 'Payment Pending', 'Payment Requested']:
-            messages.error(request, 'You cannot remove users from a allocation with status {}.'.format(
+            messages.error(request, 'You cannot remove users from a resource with status {}.'.format(
                 allocation_obj.status.name))
             return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': allocation_obj.pk}))
         else:
@@ -1648,7 +1648,7 @@ class AllocationRemoveUsersView(LoginRequiredMixin, UserPassesTestMixin, Templat
                                                 allocation_user_pk=allocation_user_obj.pk)
 
             messages.success(
-                request, 'Removed {} users from allocation.'.format(remove_users_count))
+                request, 'Removed {} users from resource.'.format(remove_users_count))
         else:
             for error in formset.errors:
                 messages.error(request, error)
@@ -1669,7 +1669,7 @@ class AllocationAttributeCreateView(LoginRequiredMixin, UserPassesTestMixin, Cre
             return True
         else:
             messages.error(
-                self.request, 'You do not have permission to add allocation attributes.')
+                self.request, 'You do not have permission to add resource attributes.')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1704,7 +1704,7 @@ class AllocationAttributeDeleteView(LoginRequiredMixin, UserPassesTestMixin, Tem
             return True
         else:
             messages.error(
-                self.request, 'You do not have permission to delete allocation attributes.')
+                self.request, 'You do not have permission to delete resource attributes.')
 
     def get_allocation_attributes_to_delete(self, allocation_obj):
 
@@ -1764,7 +1764,7 @@ class AllocationAttributeDeleteView(LoginRequiredMixin, UserPassesTestMixin, Tem
                         pk=form_data['pk'])
                     allocation_attribute.delete()
 
-            messages.success(request, 'Deleted {} attributes from allocation.'.format(
+            messages.success(request, 'Deleted {} attributes from resource.'.format(
                 attributes_deleted_count))
         else:
             for error in formset.errors:
@@ -1787,7 +1787,7 @@ class AllocationRequestListView(LoginRequiredMixin, UserPassesTestMixin, Templat
             return True
 
         messages.error(
-            self.request, 'You do not have permission to review allocation requests.')
+            self.request, 'You do not have permission to review resource requests.')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1811,7 +1811,7 @@ class AllocationActivateRequestView(LoginRequiredMixin, UserPassesTestMixin, Vie
             return True
 
         messages.error(
-            self.request, 'You do not have permission to activate a allocation request.')
+            self.request, 'You do not have permission to activate a resource request.')
 
     def get(self, request, pk):
         allocation_obj = get_object_or_404(Allocation, pk=pk)
@@ -1830,7 +1830,7 @@ class AllocationActivateRequestView(LoginRequiredMixin, UserPassesTestMixin, Vie
         allocation_obj.end_date = end_date
         allocation_obj.save()
 
-        messages.success(request, 'Allocation to {} has been ACTIVATED for {} {} ({})'.format(
+        messages.success(request, 'Resource to {} has been ACTIVATED for {} {} ({})'.format(
             allocation_obj.get_parent_resource,
             allocation_obj.project.pi.first_name,
             allocation_obj.project.pi.last_name,
@@ -1860,7 +1860,7 @@ class AllocationActivateRequestView(LoginRequiredMixin, UserPassesTestMixin, Vie
                     email_receiver_list.append(allocation_user.user.email)
 
             send_email_template(
-                'Allocation Activated',
+                'Resource Activated',
                 'email/allocation_activated.txt',
                 template_context,
                 EMAIL_SENDER,
@@ -1883,7 +1883,7 @@ class AllocationDenyRequestView(LoginRequiredMixin, UserPassesTestMixin, View):
             return True
 
         messages.error(
-            self.request, 'You do not have permission to deny a allocation request.')
+            self.request, 'You do not have permission to deny a resource request.')
 
     def get(self, request, pk):
         allocation_obj = get_object_or_404(Allocation, pk=pk)
@@ -1896,7 +1896,7 @@ class AllocationDenyRequestView(LoginRequiredMixin, UserPassesTestMixin, View):
         allocation_obj.end_date = None
         allocation_obj.save()
 
-        messages.success(request, 'Allocation to {} has been DENIED for {} {} ({})'.format(
+        messages.success(request, 'Resource to {} has been DENIED for {} {} ({})'.format(
             allocation_obj.resources.first(),
             allocation_obj.project.pi.first_name,
             allocation_obj.project.pi.last_name,
@@ -1925,7 +1925,7 @@ class AllocationDenyRequestView(LoginRequiredMixin, UserPassesTestMixin, View):
                     email_receiver_list.append(allocation_user.user.email)
 
             send_email_template(
-                'Allocation Denied',
+                'Resource Denied',
                 'email/allocation_denied.txt',
                 template_context,
                 EMAIL_SENDER,
@@ -1953,7 +1953,7 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
             return True
 
         messages.error(
-            self.request, 'You do not have permission to renew allocation.')
+            self.request, 'You do not have permission to renew resource.')
         return False
 
     def dispatch(self, request, *args, **kwargs):
@@ -1962,22 +1962,22 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
 
         if not ALLOCATION_ENABLE_ALLOCATION_RENEWAL:
             messages.error(
-                request, 'Allocation renewal is disabled. Request a new allocation to this resource if you want to continue using it after the active until date.')
+                request, 'Resource renewal is disabled. Request a new resource to this resource if you want to continue using it after the active until date.')
             return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': allocation_obj.pk}))
 
         if allocation_obj.status.name not in ['Active', ]:
-            messages.error(request, 'You cannot renew a allocation with status {}.'.format(
+            messages.error(request, 'You cannot renew a resource with status {}.'.format(
                 allocation_obj.status.name))
             return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': allocation_obj.pk}))
 
         if allocation_obj.project.needs_review:
             messages.error(
-                request, 'You cannot renew your allocation because you have to review your project first.')
+                request, 'You cannot renew your resource because you have to review your project first.')
             return HttpResponseRedirect(reverse('project-detail', kwargs={'pk': allocation_obj.project.pk}))
 
         if allocation_obj.expires_in > 60:
             messages.error(
-                request, 'It is too soon to review your allocation.')
+                request, 'It is too soon to review your resource.')
             return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': allocation_obj.pk}))
 
         return super().dispatch(request, *args, **kwargs)
@@ -2093,7 +2093,7 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
                 }
 
                 send_email_template(
-                    'Allocation renewed: {} - {}'.format(
+                    'Resource renewed: {} - {}'.format(
                         pi_name, resource_name),
                     'email/allocation_renewed.txt',
                     template_context,
@@ -2101,7 +2101,7 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
                     [EMAIL_TICKET_SYSTEM_ADDRESS, ]
                 )
 
-            messages.success(request, 'Allocation renewed successfully')
+            messages.success(request, 'Resource renewed successfully')
         else:
             if not formset.is_valid():
                 for error in formset.errors:
@@ -2314,7 +2314,7 @@ class AllocationAccountCreateView(LoginRequiredMixin, UserPassesTestMixin, Creat
             return True
         else:
             messages.error(
-                self.request, 'You do not have permission to add allocation attributes.')
+                self.request, 'You do not have permission to add resource attributes.')
             return False
 
     def form_invalid(self, form):

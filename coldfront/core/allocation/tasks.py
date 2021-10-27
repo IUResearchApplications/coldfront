@@ -33,7 +33,7 @@ def update_statuses():
         sub_obj.status = expired_status_choice
         sub_obj.save()
 
-    logger.info('Allocations set to expired: {}'.format(
+    logger.info('Resources set to expired: {}'.format(
         allocations_to_expire.count()))
 
 
@@ -89,7 +89,7 @@ def send_expiry_emails():
                                 email_receiver_list
                                 )
 
-            logger.info('Allocation to {} expiring in {} days email sent to PI {}.'.format(
+            logger.info('Resource to {} expiring in {} days email sent to PI {}.'.format(
                 resource_name, days_remaining, allocation_obj.project.pi.username))
 
     # Allocations expiring today
@@ -127,14 +127,14 @@ def send_expiry_emails():
 
                 email_receiver_list.append(allocation_user.user.email)
 
-        send_email_template('Allocation to {} expiring in {} days'.format(resource_name, days_remaining),
+        send_email_template('Resource to {} expiring in {} days'.format(resource_name, days_remaining),
                             'email/allocation_expiring.txt',
                             template_context,
                             EMAIL_SENDER,
                             email_receiver_list
                             )
 
-        logger.info('Allocation to {} expiring in {} days email sent to PI {}.'.format(
+        logger.info('Resource to {} expiring in {} days email sent to PI {}.'.format(
             resource_name, days_remaining, allocation_obj.project.pi.username))
 
     # Expired allocations
@@ -174,12 +174,12 @@ def send_expiry_emails():
 
                 email_receiver_list.append(allocation_user.user.email)
 
-        send_email_template('Allocation to {} has expired'.format(resource_name),
+        send_email_template('Resource to {} has expired'.format(resource_name),
                             'email/allocation_expired.txt',
                             template_context,
                             EMAIL_SENDER,
                             email_receiver_list
                             )
 
-        logger.info('Allocation to {} expired email sent to PI {}.'.format(
+        logger.info('Resource to {} expired email sent to PI {}.'.format(
             resource_name, allocation_obj.project.pi.username))

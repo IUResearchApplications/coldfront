@@ -723,7 +723,7 @@ class ProjectAddUsersView(LoginRequiredMixin, UserPassesTestMixin, View):
             warning_message = ''
             for username, no_account_list in no_accounts.items():
                 if no_account_list:
-                    warning_message += 'User {} was not added to allocation(s) {} due do not having an account on those resources. '.format(username, ', '.join(no_account_list))
+                    warning_message += 'User {} was not added to resource(s) {} due do not having an account on those resources. '.format(username, ', '.join(no_account_list))
             if warning_message != '':
                 warning_message = format_html(warning_message + 'Please direct them to <a href="https://access.iu.edu/Accounts/Create">https://access.iu.edu/Accounts/Create</a> to create one.\n')
                 messages.warning(

@@ -4,19 +4,19 @@
 
 
 {% block title %}
-Allocation Detail
+Resource Detail
 {% endblock %}
 
 
 {% block content %}
 {% if allocation.project.status.name == 'Archived' %}
   <div class="alert alert-warning" role="alert">
-    This is a allocation from an archived project! You cannot make any changes.
+    This is a resource from an archived project! You cannot make any changes.
   </div>
 {% endif %}
 
 <div class="mb-3">
-  <h2>Allocation Detail</h2>
+  <h2>Resource Detail</h2>
   <hr>
 </div>
 
@@ -28,7 +28,7 @@ Allocation Detail
 
 <div class="card mb-3">
   <div class="card-header">
-    <h3><i class="fas fa-list" aria-hidden="true"></i> Allocation Information</h3>
+    <h3><i class="fas fa-list" aria-hidden="true"></i> Resource Information</h3>
   </div>
   <div class="card-body">
     <form method="post">
@@ -40,7 +40,7 @@ Allocation Detail
             <td><a href="{% url 'project-detail' allocation.project.pk %}">{{ allocation.project }}</a></td>
           </tr>
           <tr>
-            <th scope="row" class="text-nowrap">Resource{{ allocation.resources.all|pluralize }} in allocation:</th>
+            <th scope="row" class="text-nowrap">Resource{{ allocation.resources.all|pluralize }}:</th>
             <td>{{ allocation.get_resources_as_string }}</td>
           </tr>
           {% if allocation.get_resources_as_string == "Carbonate DL" %}
@@ -118,7 +118,7 @@ Allocation Detail
           {% if allocation.get_resources_as_string == "Geode-Projects" %}
             <tr>
               <th scope="row" class="text-nowrap">Storage Space:</th>
-              <td>{{ allocation.storage_space_with_unit }}</td>
+              <td>{{ allocation.storage_space }}</td>
             </tr>
             <tr>
               <th scope="row" class="text-nowrap">Primary Contact:</th>
@@ -163,20 +163,6 @@ Allocation Detail
             <tr>
               <th scope="row" class="text-nowrap">Use Indefinitely:</th>
               <td>{{ allocation.use_indefinitely }}</td>
-            </tr>
-          {% endif %}
-          {% if allocation.get_resources_as_string == "RStudio Connect"%}
-            <tr>
-              <th scope="row" class="text-nowrap">Project Directory Name:</th>
-              <td>{{ allocation.project_directory_name }}</td>
-            </tr>
-            <tr>
-              <th scope="row" class="text-nowrap">Account Number:</th>
-              <td>{{ allocation.account_number }}</td>
-            </tr>
-            <tr>
-              <th scope="row" class="text-nowrap">Sub-Account Number</th>
-              <td>{{ allocation.sub_account_number }}</td>
             </tr>
           {% endif %}
           <tr>
@@ -261,14 +247,14 @@ Allocation Detail
 {% if attributes or attributes_with_usage or request.user.is_superuser %}
   <div class="card mb-3">
     <div class="card-header">
-      <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> Allocation Attributes</h3>
+      <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> Resource Attributes</h3>
       <div class="float-right">
         {% if request.user.is_superuser %}
           <a class="btn btn-success" href="{% url 'allocation-attribute-add' allocation.pk %}" role="button">
-            <i class="fas fa-plus" aria-hidden="true"></i> Add Allocation Attribute
+            <i class="fas fa-plus" aria-hidden="true"></i> Add Resource Attribute
           </a>
           <a class="btn btn-danger" href="{% url 'allocation-attribute-delete' allocation.pk %}" role="button">
-            <i class="fas fa-minus" aria-hidden="true"></i> Delete Allocation Attributes
+            <i class="fas fa-minus" aria-hidden="true"></i> Delete Resource Attributes
           </a>
         {% endif %}
       </div>
@@ -320,10 +306,10 @@ Allocation Detail
 <!-- Start Allocation Users -->
 <div class="card mb-3">
   <div class="card-header">
-    <h3 class="d-inline"><i class="fas fa-users" aria-hidden="true"></i> Users in Allocation</h3>
+    <h3 class="d-inline"><i class="fas fa-users" aria-hidden="true"></i> Users in Resource</h3>
     <span class="badge badge-secondary">{{allocation_users.count}}</span>
     <div class="float-right">
-      {% if allocation.project.status.name != 'Archived' and is_allowed_to_update_project and allocation.status.name in 'Active,New,Renewal Requested, Paid, Payment Pending, Payment Requested' %}
+      {% if allocation.project.status.name != 'Archived' and is_allowed_to_update_project and allocation.status.name in 'Active,New,Renewal Requested' %}
         <a class="btn btn-success" href="{% url 'allocation-add-users' allocation.pk %}" role="button">
           <i class="fas fa-user-plus" aria-hidden="true"></i> Add Users
         </a>

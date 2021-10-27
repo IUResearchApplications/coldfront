@@ -194,7 +194,7 @@ class SlurmAccount(SlurmBase):
             name = 'root'
 
         if name != self.name:
-            raise(SlurmError('Allocation {} slurm_account_name does not match {}'.format(
+            raise(SlurmError('Resource {} slurm_account_name does not match {}'.format(
                 allocation, self.name)))
 
         self.specs += allocation.get_attribute_list(SLURM_SPECS_ATTRIBUTE_NAME)

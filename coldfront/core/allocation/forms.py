@@ -96,7 +96,7 @@ class AllocationForm(forms.Form):
         if user_query_set:
             self.fields['users'].choices = ((user.user.username, "%s %s (%s)" % (
                 user.user.first_name, user.user.last_name, user.user.username)) for user in user_query_set)
-            self.fields['users'].help_text = '<br/>Select users in your project to add to this allocation.'
+            self.fields['users'].help_text = '<br/>Select users in your project to add to this resource.'
         else:
             self.fields['users'].widget = forms.HiddenInput()
 
@@ -111,7 +111,7 @@ class AllocationForm(forms.Form):
         else:
             self.fields['allocation_account'].widget = forms.HiddenInput()
 
-        self.fields['justification'].help_text = '<br/>Justification for requesting this allocation.'
+        self.fields['justification'].help_text = '<br/>Justification for requesting this resource.'
         self.fields['start_date'].help_text = 'Format: mm/dd/yyyy'
         self.fields['end_date'].help_text = 'Format: mm/dd/yyyy'
         self.fields['storage_space_with_unit'].help_text = 'Amount must be greater than or equal to 200GB.'
@@ -207,11 +207,11 @@ class AllocationSearchForm(forms.Form):
             is_allocatable=True).order_by('name'),
         required=False)
     allocation_attribute_name = forms.ModelChoiceField(
-        label='Allocation Attribute Name',
+        label='Resource Attribute Name',
         queryset=AllocationAttributeType.objects.all().order_by('name'),
         required=False)
     allocation_attribute_value = forms.CharField(
-        label='Allocation Attribute Value', max_length=100, required=False)
+        label='Resource Attribute Value', max_length=100, required=False)
     end_date = forms.DateField(
         label='End Date',
         widget=forms.DateInput(attrs={'class': 'datepicker'}),
@@ -229,8 +229,8 @@ class AllocationSearchForm(forms.Form):
 
 class AllocationReviewUserForm(forms.Form):
     ALLOCATION_REVIEW_USER_CHOICES = (
-        ('keep_in_allocation_and_project', 'Keep in allocation and project'),
-        ('keep_in_project_only', 'Remove from this allocation only'),
+        ('keep_in_allocation_and_project', 'Keep in resource and project'),
+        ('keep_in_project_only', 'Remove from this resource only'),
         ('remove_from_project', 'Remove from project'),
     )
 

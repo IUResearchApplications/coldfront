@@ -4,12 +4,12 @@
 
 
 {% block title %}
-Allocation Invoice List
+Resource Invoice List
 {% endblock %}
 
 
 {% block content %}
-<h2 class="d-inline">Allocations that require payment</h2>
+<h2 class="d-inline">Resources that require payment</h2>
 <button type="button" class="btn btn-success float-right" data-toggle="modal" data-target="#id_export_csv">
   Export to CSV
 </button>
@@ -79,7 +79,7 @@ Allocation Invoice List
   </div>
 {% else %}
   <div class="alert alert-info">
-    No allocations requiring payment!
+    No resources requiring payment!
   </div>
 {% endif %}
 
