@@ -353,7 +353,7 @@ class AllocationListView(LoginRequiredMixin, ListView):
         if allocation_search_form.is_valid():
             data = allocation_search_form.cleaned_data
 
-            if data.get('show_all_allocations') and (self.request.user.is_superuser or self.request.user.has_perm('allocation.can_view_all_allocations')):
+            if data.get('show_all_resources') and (self.request.user.is_superuser or self.request.user.has_perm('allocation.can_view_all_allocations')):
                 allocations = Allocation.objects.prefetch_related(
                     'project', 'project__pi', 'status',).all().order_by(order_by)
             else:

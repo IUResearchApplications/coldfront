@@ -663,7 +663,7 @@ class ProjectAddUsersView(LoginRequiredMixin, UserPassesTestMixin, View):
                 name='Active')
             allocation_user_active_status_choice = AllocationUserStatusChoice.objects.get(
                 name='Active')
-            allocation_form_data = allocation_form.cleaned_data['allocation']
+            allocation_form_data = allocation_form.cleaned_data['resource']
             if '__select_all__' in allocation_form_data:
                 allocation_form_data.remove('__select_all__')
             no_accounts = {}

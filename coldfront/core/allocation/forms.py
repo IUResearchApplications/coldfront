@@ -224,7 +224,7 @@ class AllocationSearchForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         queryset=AllocationStatusChoice.objects.all().order_by('name'),
         required=False)
-    show_all_allocations = forms.BooleanField(initial=False, required=False)
+    show_all_resources = forms.BooleanField(initial=False, required=False)
 
 
 class AllocationReviewUserForm(forms.Form):

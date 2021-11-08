@@ -41,7 +41,7 @@ class ProjectAddUserForm(forms.Form):
 
 
 class ProjectAddUsersToAllocationForm(forms.Form):
-    allocation = forms.MultipleChoiceField(
+    resource = forms.MultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(attrs={'checked': 'checked'}), required=False)
 
     def __init__(self, request_user, project_pk, *args, **kwargs):
@@ -54,10 +54,10 @@ class ProjectAddUsersToAllocationForm(forms.Form):
                                                               allocation.description if allocation.description else '')) for allocation in allocation_query_set]
         allocation_choices.insert(0, ('__select_all__', 'Select All'))
         if allocation_query_set:
-            self.fields['allocation'].choices = allocation_choices
-            self.fields['allocation'].help_text = '<br/>Select resources to add selected users to. If a user does not have an account on a resource they will not be added.'
+            self.fields['resource'].choices = allocation_choices
+            self.fields['resource'].help_text = '<br/>Select resources to add selected users to. If a user does not have an account on a resource they will not be added.'
         else:
-            self.fields['allocation'].widget = forms.HiddenInput()
+            self.fields['resource'].widget = forms.HiddenInput()
 
 
 class ProjectRemoveUserForm(forms.Form):
