@@ -39,5 +39,9 @@ urlpatterns = [
     path('allocation-account-list/', allocation_views.AllocationAccountListView.as_view(),
          name='allocation-account-list'),
     path('invoice-export/', allocation_views.AllocationInvoiceExportView.as_view(),
-         name='invoice-export')
+         name='invoice-export'),
+    path('<int:pk>/approve-renewal-request/', allocation_views.AllocationApproveRenewalRequestView.as_view(),
+         name='allocation-approve-renewal-request'),
+    path('<int:pk>/deny-renewal-request/', allocation_views.AllocationDenyRenewalRequestView.as_view(),
+         name='allocation-deny-renewal-request'),
 ]

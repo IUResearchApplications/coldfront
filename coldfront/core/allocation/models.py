@@ -1,6 +1,7 @@
 import datetime
 import logging
 from ast import literal_eval
+from dateutil.relativedelta import relativedelta
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -21,6 +22,8 @@ ALLOCATION_FUNCS_ON_EXPIRE = import_from_settings(
     'ALLOCATION_FUNCS_ON_EXPIRE', [])
 SLURM_ACCOUNT_ATTRIBUTE_NAME = import_from_settings(
     'SLURM_ACCOUNT_ATTRIBUTE_NAME', 'slurm_account_name')
+ALLOCATION_DEFAULT_ALLOCATION_LENGTH = import_from_settings(
+    'ALLOCATION_DEFAULT_ALLOCATION_LENGTH', 365)
 
 
 class AllocationStatusChoice(TimeStampedModel):
@@ -414,3 +417,47 @@ class AllocationAccount(TimeStampedModel):
 
     class Meta:
         ordering = ['name', ]
+
+
+class AllocationReviewStatusChoice(TimeStampedModel):
+    name = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name', ]
+
+
+class AllocationReview(TimeStampedModel):
+    allocation = models.ForeignKey(Allocation, on_delete=models.CASCADE)
+    status = models.ForeignKey(
+        AllocationReviewStatusChoice,
+        on_delete=models.CASCADE,
+        verbose_name="Status"
+    )
+    renewal_justification = models.TextField(blank=True, null=True)
+    history = HistoricalRecords()
+
+    def save(self, *args, **kwargs):
+        status = self.status.name
+        if status == "Pending":
+            self.allocation.status = AllocationStatusChoice.objects.get(name='Renewal Requested')
+        elif status == 'Approved':
+            self.allocation.status = AllocationStatusChoice.objects.get(name='Active')
+            start_date = datetime.datetime.now()
+            end_date = datetime.datetime.now(
+            ) + relativedelta(days=ALLOCATION_DEFAULT_ALLOCATION_LENGTH)
+
+            if self.allocation.use_indefinitely:
+                end_date = None
+
+            self.allocation.start_date = start_date
+            self.allocation.end_date = end_date
+        elif status == "Denied":
+            self.allocation.status = AllocationStatusChoice.objects.get(name='Denied')
+            self.allocation.start_date = None
+            self.allocation.end_date = None
+
+        self.allocation.save()
+        super().save(*args, **kwargs)

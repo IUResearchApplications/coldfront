@@ -31,6 +31,7 @@ from coldfront.core.allocation.forms import (AllocationAccountForm,
                                              AllocationInvoiceUpdateForm,
                                              AllocationRemoveUserForm,
                                              AllocationReviewUserForm,
+                                             AllocationReviewForm,
                                              AllocationSearchForm,
                                              AllocationUpdateForm)
 from coldfront.core.allocation.models import (Allocation, AllocationAccount,
@@ -39,7 +40,9 @@ from coldfront.core.allocation.models import (Allocation, AllocationAccount,
                                               AllocationStatusChoice,
                                               AllocationUser,
                                               AllocationUserNote,
-                                              AllocationUserStatusChoice)
+                                              AllocationUserStatusChoice,
+                                              AllocationReview,
+                                              AllocationReviewStatusChoice)
 from coldfront.core.allocation.signals import (allocation_activate_user,
                                                allocation_remove_user)
 from coldfront.core.allocation.utils import (compute_prorated_amount,
@@ -1684,8 +1687,12 @@ class AllocationRequestListView(LoginRequiredMixin, UserPassesTestMixin, Templat
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         allocation_list = Allocation.objects.filter(
-            status__name__in=['New', 'Renewal Requested', 'Paid', ])
+            status__name__in=['New', 'Paid', ])
+        allocation_renewal_list = AllocationReview.objects.filter(
+            status__name__in=['Pending', ]
+        )
         context['allocation_list'] = allocation_list
+        context['allocation_renewal_list'] = allocation_renewal_list
         context['PROJECT_ENABLE_PROJECT_REVIEW'] = PROJECT_ENABLE_PROJECT_REVIEW
         return context
 
@@ -1759,6 +1766,160 @@ class AllocationActivateRequestView(LoginRequiredMixin, UserPassesTestMixin, Vie
                 email_receiver_list
             )
 
+        return HttpResponseRedirect(reverse('allocation-request-list'))
+
+
+class AllocationApproveRenewalRequestView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = '/'
+
+    def test_func(self):
+        """ UserPassesTextMixin Tests"""
+
+        if self.request.user.is_superuser:
+            return True
+
+        if self.request.user.has_perm('allocation.can_review_allocation_requests'):
+            return True
+
+        messages.error(
+            self.request, 'You do not have permission to activate a allocation request.'
+        )
+
+    def get(self, request, pk):
+        allocation_review_obj = get_object_or_404(AllocationReview, pk=pk)
+        allocation_obj = allocation_review_obj.allocation
+
+        allocation_review_status_completed_obj = AllocationReviewStatusChoice.objects.get(
+            name="Approved"
+        )
+
+        allocation_status_active_obj = AllocationStatusChoice.objects.get(
+            name='Active')
+        start_date = datetime.datetime.now()
+        end_date = datetime.datetime.now(
+        ) + relativedelta(days=ALLOCATION_DEFAULT_ALLOCATION_LENGTH)
+
+        if allocation_obj.use_indefinitely:
+            end_date = None
+
+        allocation_obj.status = allocation_status_active_obj
+        allocation_obj.start_date = start_date
+        allocation_obj.end_date = end_date
+        allocation_obj.save()
+
+        allocation_review_obj.status = allocation_review_status_completed_obj
+        allocation_review_obj.save()
+
+        messages.success(request, 'Allocation to {} has been RENEWED for {} {} ({})'.format(
+            allocation_obj.get_parent_resource,
+            allocation_obj.project.pi.first_name,
+            allocation_obj.project.pi.last_name,
+            allocation_obj.project.pi.username)
+        )
+
+        resource_name = allocation_obj.get_parent_resource
+        domain_url = get_domain_url(self.request)
+        allocation_url = '{}{}'.format(domain_url, reverse(
+            'allocation-detail', kwargs={'pk': allocation_obj.pk}))
+
+        if EMAIL_ENABLED:
+            template_context = {
+                'center_name': EMAIL_CENTER_NAME,
+                'resource': resource_name,
+                'allocation_url': allocation_url,
+                'signature': EMAIL_SIGNATURE,
+                'opt_out_instruction_url': EMAIL_OPT_OUT_INSTRUCTION_URL
+            }
+
+            email_receiver_list = []
+
+            for allocation_user in allocation_obj.allocationuser_set.exclude(status__name__in=['Removed', 'Error']):
+                allocation_activate_user.send(
+                    sender=self.__class__, allocation_user_pk=allocation_user.pk)
+                if allocation_user.allocation.project.projectuser_set.get(user=allocation_user.user).enable_notifications:
+                    email_receiver_list.append(allocation_user.user.email)
+
+            send_email_template(
+                'Allocation Activated',
+                'email/allocation_activated.txt',
+                template_context,
+                EMAIL_SENDER,
+                email_receiver_list
+            )
+
+        return HttpResponseRedirect(reverse('allocation-request-list'))
+
+
+class AllocationDenyRenewalRequestView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = '/'
+
+    def test_func(self):
+        """ UserPassesTestMixin Tests"""
+
+        if self.request.user.is_superuser:
+            return True
+
+        if self.request.user.has_perm('allocation.can_review_allocation_requests'):
+            return True
+
+        messages.error(
+            self.request, 'You do not have permission to deny a allocation request.')
+
+    def get(self, request, pk):
+        allocation_review_obj = get_object_or_404(AllocationReview, pk=pk)
+        allocation_obj = allocation_review_obj.allocation
+
+        allocation_review_status_completed_obj = AllocationReviewStatusChoice.objects.get(
+            name="Denied"
+        )
+
+        allocation_status_denied_obj = AllocationStatusChoice.objects.get(
+            name='Denied')
+
+        allocation_obj.status = allocation_status_denied_obj
+        allocation_obj.start_date = None
+        allocation_obj.end_date = None
+        allocation_obj.save()
+
+        allocation_review_obj.status = allocation_review_status_completed_obj
+        allocation_review_obj.save()
+
+        messages.success(request, 'Allocation to {} has been DENIED for {} {} ({})'.format(
+            allocation_obj.resources.first(),
+            allocation_obj.project.pi.first_name,
+            allocation_obj.project.pi.last_name,
+            allocation_obj.project.pi.username)
+        )
+
+        resource_name = allocation_obj.get_parent_resource
+        domain_url = get_domain_url(self.request)
+        allocation_url = '{}{}'.format(domain_url, reverse(
+            'allocation-detail', kwargs={'pk': allocation_obj.pk}))
+
+        if EMAIL_ENABLED:
+            template_context = {
+                'center_name': EMAIL_CENTER_NAME,
+                'resource': resource_name,
+                'allocation_url': allocation_url,
+                'signature': EMAIL_SIGNATURE,
+                'opt_out_instruction_url': EMAIL_OPT_OUT_INSTRUCTION_URL
+            }
+
+            email_receiver_list = []
+            for allocation_user in allocation_obj.allocationuser_set.exclude(status__name__in=['Removed', 'Error']):
+                allocation_remove_user.send(
+                            sender=self.__class__, allocation_user_pk=allocation_user.pk)
+                if allocation_user.allocation.project.projectuser_set.get(user=allocation_user.user).enable_notifications:
+                    email_receiver_list.append(allocation_user.user.email)
+
+            send_email_template(
+                'Allocation Denied',
+                'email/allocation_denied.txt',
+                template_context,
+                EMAIL_SENDER,
+                email_receiver_list
+            )
+            print(email_receiver_list)
         return HttpResponseRedirect(reverse('allocation-request-list'))
 
 
@@ -1910,6 +2071,7 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
                 context['resource_eula'].update({'eula': value})
 
         context['allocation'] = allocation_obj
+        context['allocation_review_form'] = AllocationReviewForm()
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -1918,6 +2080,20 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
 
         users_in_allocation = self.get_users_in_allocation(
             allocation_obj)
+
+        allocation_review_form = AllocationReviewForm(request.POST)
+        if allocation_review_form.is_valid():
+            form_data = allocation_review_form.cleaned_data
+            allocation_review_obj = AllocationReview.objects.create(
+                allocation = allocation_obj,
+                status = AllocationReviewStatusChoice.objects.get(name='Pending'),
+                renewal_justification = form_data.get('renewal_justification')
+            )
+        else:
+            messages.error(
+                request, 'There was an error processing your allocation review'
+            )
+            return HttpResponseRedirect(reverse('project-detail', kwargs={'pk': allocation_obj.project.pk}))
 
         formset = formset_factory(
             AllocationReviewUserForm, max_num=len(users_in_allocation))
@@ -1993,7 +2169,7 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
                     [EMAIL_TICKET_SYSTEM_ADDRESS, ]
                 )
 
-            messages.success(request, 'Allocation renewed successfully')
+            messages.success(request, 'Allocation renewal submitted')
         else:
             if not formset.is_valid():
                 for error in formset.errors:

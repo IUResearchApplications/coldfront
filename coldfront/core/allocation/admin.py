@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from simple_history.admin import SimpleHistoryAdmin
 
 from coldfront.core.allocation.models import (Allocation, AllocationAccount,
+                                              AllocationReview,
                                               AllocationAdminNote,
                                               AllocationAttribute,
                                               AllocationAttributeType,
@@ -431,3 +432,19 @@ class AllocationAttributeUsageAdmin(SimpleHistoryAdmin):
 @admin.register(AllocationAccount)
 class AllocationAccountAdmin(SimpleHistoryAdmin):
     list_display = ('name', 'user', )
+
+
+@admin.register(AllocationReview)
+class AllocationReviewAdmin(SimpleHistoryAdmin):
+    list_display = ('pk', 'project', 'allocation_id', 'allocation', 'renewal_justification',
+                    'status', 'created')
+    readonly_fields = ('allocation', 'renewal_justification')
+
+    def allocation_id(self, obj):
+        return '{}'.format(obj.allocation.pk)
+
+    def project(self, obj):
+        return '{}'.format(obj.allocation.project.title)
+
+    def status(self, obj):
+        return '{}'.format(obj.allocation.status.name)

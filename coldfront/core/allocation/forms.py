@@ -498,6 +498,10 @@ class AllocationReviewUserForm(forms.Form):
     user_status = forms.ChoiceField(choices=ALLOCATION_REVIEW_USER_CHOICES)
 
 
+class AllocationReviewForm(forms.Form):
+    renewal_justification = forms.CharField(widget=forms.Textarea)
+
+
 class AllocationInvoiceNoteDeleteForm(forms.Form):
     pk = forms.IntegerField(required=False, disabled=True)
     note = forms.CharField(widget=forms.Textarea, disabled=True)
