@@ -439,6 +439,8 @@ class AllocationReviewAdmin(SimpleHistoryAdmin):
     list_display = ('pk', 'project', 'allocation_id', 'allocation', 'renewal_justification',
                     'status', 'created')
     readonly_fields = ('allocation', 'renewal_justification')
+    list_filter = ('allocation__resources', 'status')
+    search_fields = ('allocation__project__pi__username', )
 
     def allocation_id(self, obj):
         return '{}'.format(obj.allocation.pk)
