@@ -108,23 +108,42 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             ','.join([user.user.email for user in project_users])
 
         if self.request.user.is_superuser or self.request.user.has_perm('allocation.can_view_all_allocations'):
-            allocations = Allocation.objects.prefetch_related(
-                'resources').filter(project=self.object).order_by('-end_date')
+            free_allocations = Allocation.objects.prefetch_related(
+                'resources').filter(
+                    Q(project=self.object) &
+                    Q(status__name__in=['Active', 'Expired',
+                                        'New', 'Renewal Requested',
+                                        'Denied'])
+            ).order_by('-end_date')
+            priced_allocations = Allocation.objects.prefetch_related(
+                'resources').filter(
+                    Q(project=self.object) &
+                    Q(status__name__in=['Payment Pending', 'Payment Requested',
+                                        'Payment Declined', 'Paid'])
+            ).order_by('-end_date')
         else:
             if self.object.status.name in ['Active', 'New', ]:
-                allocations = Allocation.objects.filter(
+                free_allocations = Allocation.objects.filter(
                     Q(project=self.object) &
                     Q(project__projectuser__user=self.request.user) &
                     Q(project__projectuser__status__name__in=['Active', ]) &
                     Q(status__name__in=['Active', 'Expired',
                                         'New', 'Renewal Requested',
-                                        'Payment Pending', 'Payment Requested',
-                                        'Payment Declined', 'Paid','Denied']) &
+                                        'Denied']) &
+                    Q(allocationuser__user=self.request.user) &
+                    Q(allocationuser__status__name__in=['Active', ])
+                ).distinct().order_by('-end_date')
+                priced_allocations = Allocation.objects.filter(
+                    Q(project=self.object) &
+                    Q(project__projectuser__user=self.request.user) &
+                    Q(project__projectuser__status__name__in=['Active', ]) &
+                    Q(status__name__in=['Payment Pending', 'Payment Requested',
+                                        'Payment Declined', 'Paid']) &
                     Q(allocationuser__user=self.request.user) &
                     Q(allocationuser__status__name__in=['Active', ])
                 ).distinct().order_by('-end_date')
             else:
-                allocations = Allocation.objects.prefetch_related(
+                free_allocations = Allocation.objects.prefetch_related(
                     'resources').filter(project=self.object)
 
         context['publications'] = Publication.objects.filter(
@@ -133,7 +152,8 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             project=self.object).order_by('-created')
         context['grants'] = Grant.objects.filter(
             project=self.object, status__name__in=['Active', 'Pending'])
-        context['allocations'] = allocations
+        context['free_allocations'] = free_allocations
+        context['priced_allocations'] = priced_allocations
         context['project_users'] = project_users
         context['ALLOCATION_ENABLE_ALLOCATION_RENEWAL'] = ALLOCATION_ENABLE_ALLOCATION_RENEWAL
 
@@ -969,9 +989,9 @@ class ProjectReviewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         project_obj = get_object_or_404(Project, pk=self.kwargs.get('pk'))
 
-        if not project_obj.needs_review:
-            messages.error(request, 'You do not need to review this project.')
-            return HttpResponseRedirect(reverse('project-detail', kwargs={'pk': project_obj.pk}))
+        #if not project_obj.needs_review:
+        #    messages.error(request, 'You do not need to review this project.')
+        #    return HttpResponseRedirect(reverse('project-detail', kwargs={'pk': project_obj.pk}))
 
         if 'Auto-Import Project'.lower() in project_obj.title.lower():
             messages.error(
@@ -994,6 +1014,14 @@ class ProjectReviewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         context['project_review_form'] = project_review_form
         context['project_users'] = ', '.join(['{} {}'.format(ele.user.first_name, ele.user.last_name)
                                               for ele in project_obj.projectuser_set.filter(status__name='Active').order_by('user__last_name')])
+        context['free_allocations'] = Allocation.objects.filter(
+            Q(project=project_obj) &
+            Q(project__projectuser__user=self.request.user) &
+            Q(project__projectuser__status__name__in=['Active', ]) &
+            Q(status__name__in=['Active', ]) &
+            Q(allocationuser__user=self.request.user) &
+            Q(allocationuser__status__name__in=['Active', ])
+        ).distinct().order_by('-end_date')
 
         return render(request, self.template_name, context)
 
