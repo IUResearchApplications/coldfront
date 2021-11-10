@@ -2,6 +2,7 @@ import textwrap
 
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+from django.template.defaultfilters import truncatechars
 from simple_history.admin import SimpleHistoryAdmin
 
 from coldfront.core.allocation.models import (Allocation, AllocationAccount,
@@ -436,7 +437,7 @@ class AllocationAccountAdmin(SimpleHistoryAdmin):
 
 @admin.register(AllocationReview)
 class AllocationReviewAdmin(SimpleHistoryAdmin):
-    list_display = ('pk', 'project', 'allocation_id', 'allocation', 'renewal_justification',
+    list_display = ('pk', 'project', 'allocation_id', 'allocation', 'renewal_justification_shortened',
                     'status', 'created')
     readonly_fields = ('allocation', 'renewal_justification')
     list_filter = ('allocation__resources', 'status')
@@ -450,3 +451,6 @@ class AllocationReviewAdmin(SimpleHistoryAdmin):
 
     def status(self, obj):
         return '{}'.format(obj.allocation.status.name)
+
+    def renewal_justification_shortened(self, obj):
+        return truncatechars(obj.renewal_justification, 100)

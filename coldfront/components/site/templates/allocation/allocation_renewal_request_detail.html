@@ -1,0 +1,67 @@
+{% extends "common/base.html" %}
+{% load crispy_forms_tags %}
+{% load common_tags %}
+{% load static %}
+
+
+{% block title %}
+Test title
+{% endblock %}
+
+{% block content %}
+<h2>Allocation Renewal Request Info</h2>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="d-inline">{{ allocation_renewal.allocation }}</h3>
+    <a href="{% url 'allocation-detail' allocation_renewal.allocation.pk %}" role="button"><i class="far fa-folder-open" aria-hidden="true"></i><span class="sr-only">Details</span></a>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm">
+        <tr>
+          <th scope="row" class="text-nowrap">Project Title:</th>
+          <td><a href="{% url 'project-detail' allocation_renewal.allocation.project.pk %}">{{allocation_renewal.allocation.project.title|truncatechars:50}}</a></td>
+        </tr>
+        <tr>
+          <th scope="row" class="text-nowrap">PI:</th>
+            <td>
+              {{ allocation_renewal.allocation.project.pi.first_name }} {{ allocation_renewal.allocation.project.pi.last_name }} ({{ allocation_renewal.allocation.project.pi.username }})
+              <a href="mailto:{{ allocation_renewal.allocation.project.pi.email }}"><i class="far fa-envelope" aria-hidden="true"></i><span class="sr-only">Email PI</span></a>
+            </td>
+        </tr>
+        <tr>
+          {% if PROJECT_ENABLE_PROJECT_REVIEW %}
+            <th scope="col" class="text-nowrap">Project Review Status:</th>
+            <td>{{ allocation_renewal.allocation.project|convert_status_to_icon }}</td>
+          {% endif %}
+        </tr>
+        <tr>
+          <th scope="col" class="text-nowrap">Justification:</th>
+          <td>{{ allocation_renewal.renewal_justification }}</td>
+        </tr>
+        <tr>
+          <th scope="col" class="text-nowrap">Renewal Status:</th>
+          <td>{{ allocation_renewal.status }}</td>
+        </tr>
+        <tr>
+          <th scope="col" class="text-nowrap">Date Requested:</th>
+          <td>{{ allocation_renewal.allocation.modified|date:"M. d, Y" }}</td>
+        </tr>
+        <tr></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer text-right">
+    <a href="{% url 'allocation-approve-renewal-request' allocation_renewal.pk %}" class="btn btn-success mr-1">Renew</a>
+    <a href="{% url 'allocation-deny-renewal-request' allocation_renewal.pk %}" class="btn btn-danger mr-1">Deny</a>
+    <a href="{% url 'allocation-request-list' %}" class="btn btn-secondary mr-1">Back</a>
+  </div>
+</div>
+
+<script>
+  $("#navbar-main > ul > li.active").removeClass("active");
+  $("#navbar-admin").addClass("active");
+  $("#navbar-allocation-requests").addClass("active");
+</script>
+{% endblock %}

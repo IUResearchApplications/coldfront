@@ -1769,6 +1769,33 @@ class AllocationActivateRequestView(LoginRequiredMixin, UserPassesTestMixin, Vie
         return HttpResponseRedirect(reverse('allocation-request-list'))
 
 
+class AllocationRenewalRequestDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'allocation/allocation_renewal_request_detail.html'
+    login_url= '/'
+
+    def test_func(self):
+        """ UserPassesTextMixin Tests"""
+
+        if self.request.user.is_superuser:
+            return True
+
+        if self.request.user.has_perm('allocation.can_review_allocation_requests'):
+            return True
+
+        messages.error(
+            self.request, 'You do not have permission to view allocation renewal request details.'
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pk = self.kwargs.get('pk')
+        allocation_renewal_obj = get_object_or_404(AllocationReview, pk=pk)
+        context['allocation_renewal'] = allocation_renewal_obj
+        context['PROJECT_ENABLE_PROJECT_REVIEW'] = PROJECT_ENABLE_PROJECT_REVIEW
+
+        return context
+
+
 class AllocationApproveRenewalRequestView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = '/'
 

@@ -44,4 +44,6 @@ urlpatterns = [
          name='allocation-approve-renewal-request'),
     path('<int:pk>/deny-renewal-request/', allocation_views.AllocationDenyRenewalRequestView.as_view(),
          name='allocation-deny-renewal-request'),
+    path('renewal-request-detail/<int:pk>/', allocation_views.AllocationRenewalRequestDetailView.as_view(),
+         name='allocation-renewal-request-detail')
 ]

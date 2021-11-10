@@ -12,52 +12,69 @@ Allocation Review New and Pending Requests
 {% block content %}
 <h2>Allocation Requests</h2>
 
-{% if allocation_list %}
-  <div class="table-responsive">
-    <table class="table table-md">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Date Requested/<br>Last Modified</th>
-          <th scope="col">Project Title</th>
-          <th scope="col">PI</th>
-          <th scope="col">Resource</th>
-          {% if PROJECT_ENABLE_PROJECT_REVIEW %}
-            <th scope="col" class="text-nowrap">Project Review Status</th>
-          {% endif %}
-          <th scope="col">Status</th>
-          <th scope="col">Justification</th>
-          <th scope="col">Allocation Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for allocation in allocation_list %}
-          <tr>
-            <td><a href="{% url 'allocation-detail' allocation.pk %}">{{allocation.pk}}</a></td>
-            <td>{{ allocation.modified|date:"M. d, Y" }}</td>
-            <td><a href="{% url 'project-detail' allocation.project.pk %}">{{allocation.project.title|truncatechars:50}}</a></td>
-            <td>{{allocation.project.pi.first_name}} {{allocation.project.pi.last_name}}
-              ({{allocation.project.pi.username}})</td>
-            <td>{{allocation.get_parent_resource}}</td>
-            {% if PROJECT_ENABLE_PROJECT_REVIEW %}
-              <td class="text-center">{{allocation.project|convert_status_to_icon}}</td>
-            {% endif %}
-            <td>{{allocation.status}}</td>
-            <td>{{allocation.justification}}</td>
-            <td class="text-nowrap">
-              <a href="{% url 'allocation-activate-request' allocation.pk %}" class="btn btn-success mr-1">Activate</a>
-              <a href="{% url 'allocation-deny-request' allocation.pk %}" class="btn btn-danger mr-1">Deny</a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<div class="mb-3" id="request_accordion">
+  <div class="card">
+    <div class="card-header">
+      <a id="expand_button_1" role="button" class="card-link" data-toggle="collapse" href="#collapseOne">
+        Expand
+        <i id="plus_minus_1" class="fas {{expand_accordion|get_icon}} float-right"></i>
+      </a>
+    </div>
+    <div class="collapseOne" class="collapse {{expand_accordion}}" data-parent="#request_accordion">
+      <div class="card-body">
+        {% if allocation_list %}
+        <div class="table-responsive">
+          <table class="table table-md">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Date Requested/<br>Last Modified</th>
+                <th scope="col">Project Title</th>
+                <th scope="col">PI</th>
+                <th scope="col">Resource</th>
+                {% if PROJECT_ENABLE_PROJECT_REVIEW %}
+                  <th scope="col" class="text-nowrap">Project Review Status</th>
+                {% endif %}
+                <th scope="col">Status</th>
+                <th scope="col">Justification</th>
+                <th scope="col">Allocation Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for allocation in allocation_list %}
+                <tr>
+                  <td><a href="{% url 'allocation-detail' allocation.pk %}">{{allocation.pk}}</a></td>
+                  <td>{{ allocation.modified|date:"M. d, Y" }}</td>
+                  <td><a href="{% url 'project-detail' allocation.project.pk %}">{{allocation.project.title|truncatechars:50}}</a></td>
+                  <td>{{allocation.project.pi.first_name}} {{allocation.project.pi.last_name}}
+                    ({{allocation.project.pi.username}})</td>
+                  <td>{{allocation.get_parent_resource}}</td>
+                  {% if PROJECT_ENABLE_PROJECT_REVIEW %}
+                    <td class="text-center">{{allocation.project|convert_status_to_icon}}</td>
+                  {% endif %}
+                  <td>{{allocation.status}}</td>
+                  <td>{{allocation.justification|truncatechars:50}}</td>
+                  <td class="text-nowrap">
+                    <a href="{% url 'allocation-activate-request' allocation.pk %}" class="btn btn-success mr-1">Activate</a>
+                    <a href="{% url 'allocation-deny-request' allocation.pk %}" class="btn btn-danger mr-1">Deny</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-info">
+          No new allocation requests!
+        </div>
+      {% endif %}
+      </div>
+    </div>
   </div>
-{% else %}
-  <div class="alert alert-info">
-    No new allocation requests!
-  </div>
-{% endif %}
+</div>
+
+</div>
+
 
 <h2>Allocation Renewal Requests</h2>
 {% if allocation_renewal_list %}
@@ -65,7 +82,7 @@ Allocation Review New and Pending Requests
     <table class="table table-md">
       <thead>
         <tr>
-          <th scope="col">#</th>
+          <th scope="col">More Info</th>
           <th scope="col">Date Requested</th>
           <th scope="col">Project Title</th>
           <th scope="col">PI</th>
@@ -81,7 +98,7 @@ Allocation Review New and Pending Requests
       <tbody>
         {% for allocation_renewal in allocation_renewal_list %}
           <tr>
-            <td><a href="{% url 'allocation-detail' allocation_renewal.allocation.pk %}">{{allocation_renewal.allocation.pk}}</a></td>
+            <td><a href="{% url 'allocation-renewal-request-detail' allocation_renewal.pk %}">{{allocation_renewal.pk}}</a></td>
             <td>{{ allocation_renewal.allocation.modified|date:"M. d, Y" }}</td>
             <td><a href="{% url 'project-detail' allocation_renewal.allocation.project.pk %}">{{allocation_renewal.allocation.project.title|truncatechars:50}}</a></td>
             <td>{{allocation_renewal.allocation.project.pi.first_name}} {{allocation_renewal.allocation.project.pi.last_name}}
@@ -91,7 +108,7 @@ Allocation Review New and Pending Requests
               <td class="text-center">{{allocation_renewal.allocation.project|convert_status_to_icon}}</td>
             {% endif %}
             <td>{{allocation_renewal.status}}</td>
-            <td>{{allocation_renewal.renewal_justification}}</td>
+            <td>{{allocation_renewal.renewal_justification|truncatechars:50}}</td>
             <td class="text-nowrap">
               <a href="{% url 'allocation-approve-renewal-request' allocation_renewal.pk %}" class="btn btn-success mr-1">Renew</a>
               <a href="{% url 'allocation-deny-renewal-request' allocation_renewal.pk %}" class="btn btn-danger mr-1">Deny</a>              
@@ -111,5 +128,11 @@ Allocation Review New and Pending Requests
   $("#navbar-main > ul > li.active").removeClass("active");
   $("#navbar-admin").addClass("active");
   $("#navbar-allocation-requests").addClass("active");
+
+  $("#expand_button_1").click(function () {
+    $('#collapseOne').collapse();
+    icon = $("#plus_minus_1");
+    icon.toggleClass("fa-plus fa-minus");
+  });
 </script>
 {% endblock %}
