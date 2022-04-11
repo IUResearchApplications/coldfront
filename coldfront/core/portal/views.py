@@ -1,6 +1,8 @@
 import operator
+from datetime import datetime
 from collections import Counter
 
+from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Count, Q, Sum
@@ -18,47 +20,68 @@ from coldfront.core.publication.models import Publication
 from coldfront.core.research_output.models import ResearchOutput
 
 
+def welcome(request):
+    context = {}
+
+    if request.user.is_authenticated:
+        template_name = 'portal/welcome.html'
+        current_hour = datetime.now().hour
+        time_of_day = 'Morning'
+        if current_hour >= 12:
+            time_of_day = 'Afternoon'
+        elif current_hour >= 18:
+            time_of_day = 'Evening'
+        context['greeting'] = 'Good {} {} {}'.format(
+            time_of_day,
+            request.user.first_name,
+            request.user.last_name
+        )
+        context['hello'] = 'hello'
+    else:
+        template_name = 'portal/nonauthorized_home.html'
+
+    return render(request, template_name, context)
+
+
+@login_required
 def home(request):
 
     context = {}
-    if request.user.is_authenticated:
-        template_name = 'portal/authorized_home.html'
-        project_list = Project.objects.filter(
-            (
-                Q(pi=request.user) &
-                Q(
-                    status__name__in=[
-                        'New',
-                        'Active',
-                        'Waiting For Admin Approval',
-                        'Review Pending',
-                        'Expired'
-                    ]
-                )
-            ) |
-            (Q(status__name__in=['New', 'Active', ]) &
-             Q(projectuser__user=request.user) &
-             Q(projectuser__status__name__in=['Active', ]))
-        ).distinct().order_by('-created')[:5]
+    template_name = 'portal/authorized_home.html'
+    project_list = Project.objects.filter(
+        (
+            Q(pi=request.user) &
+            Q(
+                status__name__in=[
+                    'New',
+                    'Active',
+                    'Waiting For Admin Approval',
+                    'Review Pending',
+                    'Expired'
+                ]
+            )
+        ) |
+        (Q(status__name__in=['New', 'Active', ]) &
+            Q(projectuser__user=request.user) &
+            Q(projectuser__status__name__in=['Active', ]))
+    ).distinct().order_by('-created')[:5]
 
-        allocation_list = Allocation.objects.filter(
-            Q(status__name__in=['Active', 'New', 'Renewal Requested', ]) &
-            Q(project__status__name__in=['Active', 'New', 'Review Pending', 'Expired']) &
-            Q(project__projectuser__user=request.user) &
-            Q(project__projectuser__status__name__in=['Active', ]) &
-            Q(allocationuser__user=request.user) &
-            Q(allocationuser__status__name__in=['Active', 'Pending - Remove'])
-        ).distinct().order_by('-created')[:5]
+    allocation_list = Allocation.objects.filter(
+        Q(status__name__in=['Active', 'New', 'Renewal Requested', ]) &
+        Q(project__status__name__in=['Active', 'New', 'Review Pending', 'Expired']) &
+        Q(project__projectuser__user=request.user) &
+        Q(project__projectuser__status__name__in=['Active', ]) &
+        Q(allocationuser__user=request.user) &
+        Q(allocationuser__status__name__in=['Active', 'Pending - Remove'])
+    ).distinct().order_by('-created')[:5]
 
-        context['user'] = request.user
-        context['project_list'] = project_list
-        context['allocation_list'] = allocation_list
-        try:
-            context['ondemand_url'] = settings.ONDEMAND_URL
-        except AttributeError:
-            pass
-    else:
-        template_name = 'portal/nonauthorized_home.html'
+    context['user'] = request.user
+    context['project_list'] = project_list
+    context['allocation_list'] = allocation_list
+    try:
+        context['ondemand_url'] = settings.ONDEMAND_URL
+    except AttributeError:
+        pass
 
     context['EXTRA_APPS'] = settings.INSTALLED_APPS
 

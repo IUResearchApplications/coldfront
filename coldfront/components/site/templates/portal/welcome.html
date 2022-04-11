@@ -1,0 +1,47 @@
+{% extends "common/base.html" %}
+{% load common_tags %}
+
+{% block title %}
+Welcome to ColdFront!
+{% endblock %}
+
+{% block content %}
+<div>
+  <h1 class="text-center">ColdFront</h1>
+</div>
+
+<h2>{{ greeting }}</h2>
+
+<div class="row">
+  <div class="col pl-0">
+    <div class="card mb-3">
+      <div class="card-header mb-3">
+        <h4>About</h4>
+      </div>
+      <div class="card-body mb-3">
+        {% lorem %}
+      </div>
+    </div>
+    <div class="card mb-3">
+      <div class="card-header mb-3">
+        <h4>Getting Started</h4>
+      </div>
+      <div class="card-body mb-3">
+        You can use the navbar above to navigate around the site.
+        If you are a faculty/staff member you can submit a project request using <a
+          href="{% url 'project-create' %}">this form</a>.
+        Once submitted you can add any additional users to your project and request a resource
+        allocation. If you are a student you do not have access to submitting a project request.
+        You can, however, search your PI's username <a href="{% url 'project-list' %}">here</a> and request access to
+        a project they
+        already have.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $("#navbar-main > ul > li.active").removeClass("active");
+</script>
+
+{% endblock %}

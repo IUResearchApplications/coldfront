@@ -14,7 +14,8 @@ admin.site.site_title = 'ColdFront Administration'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain'), name="robots"),
-    path('', portal_views.home, name='home'),
+    path('home', portal_views.home, name='home'),
+    path('', portal_views.welcome, name='welcome'),
     path('center-summary', portal_views.center_summary, name='center-summary'),
     path('allocation-summary', portal_views.allocation_summary, name='allocation-summary'),
     path('allocation-by-fos', portal_views.allocation_by_fos, name='allocation-by-fos'),
