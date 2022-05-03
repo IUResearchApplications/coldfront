@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.db.models import Q
 from django.urls import reverse
 
@@ -17,6 +17,7 @@ if EMAIL_ENABLED:
         'EMAIL_OPT_OUT_INSTRUCTION_URL')
     EMAIL_SIGNATURE = import_from_settings('EMAIL_SIGNATURE')
     EMAIL_CENTER_NAME = import_from_settings('CENTER_NAME')
+
 
 def set_allocation_user_status_to_error(allocation_user_pk):
     allocation_user_obj = AllocationUser.objects.get(pk=allocation_user_pk)
@@ -64,7 +65,7 @@ def get_user_resources(user_obj):
         resources = Resource.objects.filter(
             Q(is_allocatable=True) &
             Q(is_available=True) &
-            (Q(is_public=True) | Q(allowed_groups__in=user_obj.groups.all()) | Q(allowed_users__in=[user_obj,]))
+            (Q(is_public=True) | Q(allowed_groups__in=user_obj.groups.all()) | Q(allowed_users__in=[user_obj, ]))
         ).distinct()
 
     return resources
@@ -87,7 +88,7 @@ def compute_prorated_amount(total_cost):
     return round(cost_per_day * difference.days + cost_per_day)
 
 
-def send_allocation_user_request_email(request, usernames, parent_resource_name):
+def send_allocation_user_request_email(request, usernames, parent_resource_name, email_receiver_list):
     if EMAIL_ENABLED:
         domain_url = get_domain_url(request)
         url = '{}{}'.format(domain_url, reverse('allocation-user-request-list'))
@@ -98,8 +99,6 @@ def send_allocation_user_request_email(request, usernames, parent_resource_name)
             'signature': EMAIL_SIGNATURE,
             'users': usernames
         }
-
-        email_receiver_list = [EMAIL_TICKET_SYSTEM_ADDRESS]
 
         send_email_template(
             'New Allocation User Request(s)',

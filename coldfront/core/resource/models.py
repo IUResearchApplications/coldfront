@@ -74,6 +74,9 @@ class Resource(TimeStampedModel):
     is_public = models.BooleanField(default=True)
     is_allocatable = models.BooleanField(default=True)
     requires_payment = models.BooleanField(default=False)
+    review_groups = models.ManyToManyField(
+        Group, blank=True, related_name='review_groups_resource_set'
+    )
     allowed_groups = models.ManyToManyField(Group, blank=True)
     allowed_users = models.ManyToManyField(User, blank=True)
     linked_resources = models.ManyToManyField('self', blank=True)
@@ -246,7 +249,7 @@ class ResourceAttribute(TimeStampedModel):
             )
         elif expected_value_type == "True/False" and self.value not in ["True", "False", ""]:
             raise ValidationError(
-                'Invalid Value "%s". Allowed inputs are "True" or "False".'
+                'Invalid Value "%s". Allowed inputs are "True" or "False".' % (self.value)
             )
         elif expected_value_type == "Date" and not self.value == "":
             try:
