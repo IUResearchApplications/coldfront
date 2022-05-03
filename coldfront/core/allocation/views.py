@@ -1929,7 +1929,8 @@ class AllocationActivateRequestView(LoginRequiredMixin, UserPassesTestMixin, Vie
                 email_receiver_list
             )
 
-        if 'request-list' in request.META.get('HTTP_REFERER'):
+        prev_url = self.request.META.get('HTTP_REFERER')
+        if 'request-list' in prev_url:
             return HttpResponseRedirect(reverse('allocation-request-list'))
         else:
             return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': pk}))
