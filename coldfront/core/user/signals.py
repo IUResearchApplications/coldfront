@@ -33,7 +33,7 @@ def create_user_profile(sender, instance, created, **kwargs):
             #     max_projects = -1
             max_projects = -1
             is_pi = False
-            if title in ['Faculty', 'Staff', ]:
+            if title in ['Faculty', 'Staff', 'Academic (ACNP)',]:
                 is_pi = True
 
             department = ''
