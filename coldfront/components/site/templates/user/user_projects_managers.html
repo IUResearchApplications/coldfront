@@ -8,8 +8,17 @@ User Projects and Managers{% if not user == viewed_user %}: {{ viewed_user.usern
 
 
 {% block content %}
-<h2>User Projects and Managers{% if not user == viewed_user %}: {{ viewed_user.username }}{% endif %}</h2>
-
+<div>
+  <h2 class="d-inline">User Projects and Managers{% if not user == viewed_user %}: {{ viewed_user.username }}{% endif %}</h2>
+  {% if user_report_pdf %}
+    {% if user.is_superuser or user.is_staff %}
+      <a href="{% url 'user-report' %}?user={{viewed_user.username}}" role="button" class="btn btn-success float-right">
+        Generate User Report
+      </a>
+    {% endif %}
+  {% endif %} 
+</div>
+<hr>
 {% with object_list as user_project_associations %}
   {% if not user_project_associations %}
     <p class="alert alert-info" role="alert"><i class="fas fa-info-circle" aria-hidden="true"></i> {{ user_pronounish }} {{user_verbform_be}} not part of any projects.</p>

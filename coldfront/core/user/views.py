@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -199,6 +200,7 @@ class UserProjectsManagersView(ListView):
         context = super().get_context_data(**kwargs)
 
         context['viewed_user'] = self.viewed_user
+        context['user_report_pdf'] = 'coldfront.plugins.pdf' in settings.INSTALLED_APPS
 
         if self.request.user == self.viewed_user:
             context['user_pronounish'] = 'You'

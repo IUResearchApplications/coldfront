@@ -32,6 +32,7 @@ plugin_configs = {
     'PLUGIN_ADVANCED_SEARCH': 'plugins/advanced_search.py',
     'PLUGIN_MAINTENANCE_MODE': 'plugins/maintenance_mode.py',
     'PLUGIN_SLATE_PROJECT':'plugins/slate_project.py',
+    'PLUGIN_PDF': 'plugins/pdf.py',
 }
 
 # This allows plugins to be enabled via environment variables. Can alternatively
