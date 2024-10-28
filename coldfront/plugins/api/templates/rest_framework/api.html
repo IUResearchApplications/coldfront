@@ -1,0 +1,31 @@
+{% extends "rest_framework/base.html" %}
+{% load i18n %}
+{% load static %}
+{% load rest_framework %}
+
+{% block title %}
+  RT Projects
+{% endblock %}
+
+{% block branding %}
+  <a class='navbar-brand' rel="nofollow" href="/api/">
+    RT Projects API
+  </a>
+{% endblock %}
+
+{% block userlinks %}
+  <li class="navbar-link"><a rel="nofollow" href="{% url 'home' %}">Return to Site</a></li>
+  {% if user.is_authenticated %}
+  <li class="navbar-link">
+    <a class="dropdown-item" href="{% url 'logout' %}?next=/api/">Log Out</a>
+  </li>
+  {% else %}
+    <li class="navbar-link"><a href="{% url 'login'%}?next={{ request.GET.next }}">Log In</a></li>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% include 'common/messages.html' %} 
+  {{ block.super }}
+
+{% endblock %}

@@ -30,6 +30,9 @@ urlpatterns = [
     path('research-output/', include('coldfront.core.research_output.urls')), 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
+if 'coldfront.plugins.api' in settings.INSTALLED_APPS:
+    urlpatterns.append(path('api/', include('coldfront.plugins.api.urls')))
+
 if 'coldfront.plugins.pi_search' in settings.INSTALLED_APPS:
     urlpatterns.append(path('pi_search_function/', include('coldfront.plugins.pi_search.urls')))
 
