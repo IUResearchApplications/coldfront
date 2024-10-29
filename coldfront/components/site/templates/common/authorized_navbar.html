@@ -54,7 +54,7 @@
         {% if 'coldfront.plugins.api' in EXTRA_APPS %}
           {% if request.user.is_staff %}
           <li id="navbar-api" class="nav-item">
-            <a class="nav-link" href="{% url 'api-root' %}">API</a>
+            <a class="nav-link" href="{% url 'api:api-root' %}">API</a>
           </li>
           {% endif %}
         {% endif %}

@@ -8,7 +8,7 @@ router.register(r'users', UserViewSet)
 router.register(r'allocations', AllocationViewSet)
 router.register(r'allocations-attributes', AllocationAttributeViewSet)
 
-# app_name='api'
+app_name='api'
 urlpatterns = [
     path('', include(router.urls)),
 ]
