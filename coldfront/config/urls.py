@@ -32,6 +32,9 @@ urlpatterns = [
 if 'coldfront.plugins.announcements' in settings.INSTALLED_APPS:
     urlpatterns.append(path('announcements/', include('coldfront.plugins.announcements.urls')))
 
+if 'coldfront.plugins.allocation_removal_requests' in settings.INSTALLED_APPS:
+    urlpatterns.append(path('allocation_removal_requests/', include('coldfront.plugins.allocation_removal_requests.urls')))
+
 if 'coldfront.plugins.pi_search' in settings.INSTALLED_APPS:
     urlpatterns.append(path('pi_search_function/', include('coldfront.plugins.pi_search.urls')))
 
